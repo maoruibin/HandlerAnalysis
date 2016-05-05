@@ -1,16 +1,17 @@
-# HandlerAnalysis
-
-一篇博客[Handler 之 初识及简单应用](/HandlerIntroduce.md)中介绍了 Handler 的作用，以及 Handler 的基本用法，同时也详细介绍了为什么子线程不能更新 UI 的原因，但是因为篇幅原因，所以对 Handler 的内部机制并没有展开叙述。这篇文章就从 Handler 开始解析与之相关的源码，从而更好的理解 Handler 以及 Looper MessageQueue。
+# Handler 之 源码解析
+在分析源码之前，如果你对 Hanlder 存在的意义及作用不明白，你可以查看上一篇文章 [Handler 之 初识及简单应用](/HandlerIntroduce.md)，这篇文章同时也详细介绍了为什么子线程不能更新 UI 的原因，但是因为篇幅原因，所以对 Handler 的内部机制并没有展开叙述。这篇文章就从 Handler 开始解析与之相关的源码，从而更好的理解 Handler 以及 Looper MessageQueue。
 
 ## Handler 机制
 
-写完上一篇文章，下面我该再读一遍 Handler 的源码了，其实讲 Handler 内部机制的博客已经很多了，但是自己还是要在看一遍，源码是最好的资料。
+写完上一篇文章，下面该再读一遍 Handler 的源码了，其实讲 Handler 内部机制的博客已经很多了，但是自己还是要在看一遍，源码是最好的资料。
 
 在具体看源码之前，有必要先理解一下 Handler、Looper、MessageQueue 以及 Message 他们的关系。
 
 ### 关系
 
 Looper: 是一个消息轮训器，他有一个叫 loop() 的方法，用于启动一个死循环，不停的去轮询消息池。
+
+这里插一句，Looper 中的 loop() 方法是如何实现阻塞的呢？可查看 [Android-Discuss issue 245](https://github.com/android-cn/android-discuss/issues/245)
 
 MessageQueue: 就是上面说到的消息池
 
@@ -71,8 +72,6 @@ Looper，同时对应一个 MessageQueue 对象。这里给 MessageQueue 的赋�
 `这里出现了一个平时不怎么看到的 ThreadLocal 类，关于这个类，推荐去阅读任玉刚的一篇文章 - Android的消息机制之ThreadLocal的工作原理,讲的很不错。另外自己也写了一篇文章，用于讲解 ThreadLocal 的用法，以及他在 Handler 和 Looper 中的巧妙意义。`
 
 [任玉刚 - Android的消息机制之ThreadLocal的工作原理](http://blog.csdn.net/singwhatiwanna/article/details/48350919)
-
-[咕咚 - Handler 之 ThreadLocal 相关](/2016/03/11/handler_analysis_three.html)
 
 
 这里他是通过 ThreadLocal 的 get 方法获得，很奇怪，之前我们没有在任何地方对 sThreadLocal 执行过 set 操作。
