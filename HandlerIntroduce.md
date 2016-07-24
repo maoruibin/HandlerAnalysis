@@ -1,5 +1,9 @@
 #Handler
 
+##前言
+
+这篇文章从 为什么要有 Handler 到 如何使用 Handler 两个方面对 Handler 进行了介绍，并对我们熟知的常识『Android 中不允许在子线程中更新 UI』做了一个简要的分析。算是一篇比较基础的 Handler 介绍分析文章，另外由于篇幅原因，Handler 源码分析并未在该篇中介绍，如果要看，可以直接点击[Handler 之 源码解析](http://gudong.name/2016/03/10/handler_analysis_two.html) 
+
 这篇文章主要讲解和记录自己对 Handler 的理解。因为一开始接触 Android 就接触到了 Handler，所以对 handler 的了解应该比较多，加上项目中在消息传递以及异步控制方面都要用到 Handler。自己也不止一遍的看过 Handler 源码，不过每次看的时候都能明白，但是时间久了，就很容易忘记。所以这次就有了这个 Handler 系列。从 Handler 的使用场景，到具体使用再到源码解析，自己重新再走一遍，同时通过博客记录下来，方便以后查阅。我想，这也是写博客的意义所在。
 
 谈一个东西之前，首先说明白他为什么要存在。也就是它存在的意义。
@@ -12,7 +16,7 @@
 
 但是，在 Android 中有一些操作是很耗费时间的，比如从网络加载一个大图片。因为要建立连接，请求服务端，解析数据等等的操作，所以完成这样的操作，就不是一下两下能做到的。
 
-试想，这个操作发生在主线程，由于线程同一时间只能执行一个操作，所以在请求网络图片的过程中，主线程不能做一些其他的更新 UI 相关的操作，所以我们现在能看到的就是，界面被卡住了，原因已经很清楚，主线程被耗时操作阻塞了。
+试想，这个操作发生在主线程，由于线程同一时间只能执行一个操作，所以在请求网络图片的过程中，主线程会处于阻塞状态，所以我们现在能看到的就是，界面被卡住了。
 
 这种卡住的状态直到请求成功。
 
@@ -25,11 +29,11 @@
     No response to an input event (such as key press or screen touch events) within 5 seconds.
     A BroadcastReceiver hasn't finished executing within 10 seconds.
 
-这里需要说明的一点，其实在 Android 4.0 之后，系统已经不允许在 UI 线程访问网络了，以前只是 ANR，4.0 之后就直接FC了。
+这里需要说明的一点，其实在 Android 4.0 之后，系统已经不允许在 UI 线程访问网络了，只要在 UI 线程做了访问网络的操作，程序就会直接奔溃。
 
 所以，作为开发者，你一定不希望这样的事发生在你的 App 里，所以我们一定要避免把一个耗时可能超过5秒的操作放在主线程。那我们怎么才能做到呢？
 
-其实目前已经有很多方法可以做到这一点，用 Thread + Handler 的组合或者使用 AsyncTask，当然如果你知道 RxJava 的话，用 RxJava 也是相当
+其实目前已经有很多方法可以做到这一点，用 Thread + Handler 的组合或者使用 AsyncTask，当然如果你知道 [RxJava](https://github.com/ReactiveX/RxJava) 的话，用 RxJava 也是相当
 不错的选择。上述三种方式都可实现。
 
 官方也已经提供了一个指南，用于介绍如何避免这种问题，他用到了 AsyncTask，原文 [Keeping Your App Responsive](http://developer.android.com/intl/ru/training/articles/perf-anr.html),可以一看。
@@ -73,21 +77,27 @@ private void executeTask(){
 的操作，而 Android 系统不允许我们的代码在子线程中去更新 UI，更新 UI 的操作只能发生在主线程，so ~ 我们的代码执行到 setImageResource 这里的时候就崩溃了。
 
 
-```java
-    Process: name.gudong.picassodemo, PID: 27044 android.view.ViewRootImpl$CalledFromWrongThreadException:
+```
+Process: name.gudong.picassodemo, PID: 27044 android.view.ViewRootImpl$CalledFromWrongThreadException:
 
-           Only the original thread that created a view hierarchy can touch its views.
+       Only the original thread that created a view hierarchy can touch its views.
 
-           at android.view.ViewRootImpl.checkThread(ViewRootImpl.java:6581)
-           at android.view.ViewRootImpl.requestLayout(ViewRootImpl.java:924)
+       at android.view.ViewRootImpl.checkThread(ViewRootImpl.java:6581)
+       at android.view.ViewRootImpl.requestLayout(ViewRootImpl.java:924)
 ```
 
-奔溃提示如上所示，注意中间那句提示，说的很明白，简单翻译一下
+奔溃提示如上所示，注意中间那句提示，说的很明白
 
-```java
+```
 Only the original thread that created a view hierarchy can touch its views.
 ```
-    只有创建了这个 view 层次树的线程才可以去 touch(泛指操作)这个 View
+
+简单翻译一下
+
+```
+只有创建了这个 view 层次树的线程才可以去 touch(泛指操作)这个 View
+```
+
 
 因为 Activity 的 view 层次树是在主线程完成初始化的，所以对所有依附于这个层次树的 view ,你要是后续想要 touch 它，就一定要在主线程中 touch，不能挪到其他子线程中去 touch。
 
