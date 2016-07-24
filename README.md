@@ -7,7 +7,9 @@
 
 # Handler 之 源码解析
 
-这篇文章是对 Handler 的源码解析，如果你是初学者，对 Handler 才开始学习，推荐你先看上一篇文章，[Handler 之 初识及简单应用](/HandlerIntroduce.md)，这篇文章从为什么要有 Handler 到 如何使用 Handler 两个方面对 Handler 进行了介绍，并对我们熟知的常识『Android 中不允许在子线程中更新 UI』做了一个简要的分析。
+这篇文章是对 Handler 的源码解析。如果你是初学者，对 Handler 才开始学习，推荐你先看上一篇文章，[Handler 之 初识及简单应用](/HandlerIntroduce.md)，那是一篇对 Handler 的基础讲解，从为什么要有 Handler 到 如何使用 Handler 两个方面对 Handler 进行了介绍，并对我们熟知的常识『Android 中不允许在子线程中更新 UI』做了一个简要的分析。
+
+好，下面开始 Handler 源码解析。
 
 ## Handler 机制
 
