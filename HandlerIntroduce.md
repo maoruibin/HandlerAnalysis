@@ -42,6 +42,7 @@
 
 是的，所以我们可以在主线程 new 一个子线程，让它开启工作，像下面这样
 
+```java
     private void executeTask(){
       new Thread(new Runnable() {
           @Override
@@ -55,6 +56,7 @@
           }
       }).start();
     }
+```
 
 如上所示，loadImg() 就是一个耗时操作，可以猜想的到，它里面都发生了什么。
 
@@ -70,17 +72,21 @@
 此时当你调用上面的方法后，你的应用又崩了。因为此时的 setImageBitmap() 方法调用发生在子线程，同时，这个方法属于更新界面 UI
 的操作，而 Android 系统不允许我们的代码在子线程中去更新 UI，更新 UI 的操作只能发生在主线程，so ~ 我们的代码执行到 setImageResource 这里的时候就崩溃了。
 
+
+```java
     Process: name.gudong.picassodemo, PID: 27044 android.view.ViewRootImpl$CalledFromWrongThreadException:
 
            Only the original thread that created a view hierarchy can touch its views.
 
            at android.view.ViewRootImpl.checkThread(ViewRootImpl.java:6581)
            at android.view.ViewRootImpl.requestLayout(ViewRootImpl.java:924)
+```
 
 奔溃提示如上所示，注意中间那句提示，说的很明白，简单翻译一下
 
+```java
     Only the original thread that created a view hierarchy can touch its views.
-
+```
     只有创建了这个 view 层次树的线程才可以去 touch(泛指操作)这个 View
 
 因为 Activity 的 view 层次树是在主线程完成初始化的，所以对所有依附于这个层次树的 view ,你要是后续想要 touch 它，就一定要在主线程中 touch，不能挪到其他子线程中去 touch。
@@ -89,7 +95,9 @@
 
 一般的，我们在 onCreate 中调用 setContent() 方法就可以完成布局的设置和加载，如下所示。
 
+```java
       setContentView(R.layout.activity_handler);
+```
 
 很明显，setContent() 是在主线程中调用完成的，这里如果深究 setContent(),你会发现是 PhoneWindow 最终执行了相关的逻辑，而最终
 通过 Window 的一系列操作，这个 Activity 对应的 View 层次树也就创建成功。同时，这个 Activity 中的所有 view 都将依附于这个层次树。
@@ -98,7 +106,9 @@
 
 我们在线程中获取到一张 Bitmap 并直接调用 imageView 的 setImageBitmap 方法，报了如下的错误。
 
+```java
     Only the original thread that created a view hierarchy can touch its views.       
+```
 
 就是因为 这个 imageView 依附的层次树是在主线程中创建的。
 
@@ -119,6 +129,7 @@ Handler 来了~
 
 此时只要在子线程中去调用 handler 的 sendMessage(msg,obj) 方法，你就可以把自己的逻辑，或者程序流给甩到主线程(暂且让我们这么形容吧~)。
 
+```java
     private void executeTask(){
          new Thread(new Runnable() {
              @Override
@@ -138,11 +149,13 @@ Handler 来了~
              }
          }).start();
      }
+```
 
 上面可以看到，在子线程里，在执行完耗时操作，得到 bitmap 后，我们简单封装了一个 msg 对象，我们就把这个 msg
 通过 mHandler 的 sendMessage 方法，甩到了主线程，主线程中 mHandler 的 handMessage() 方法会处理被甩过来的 msg 对象；
 如下所示：
 
+```java
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -158,13 +171,15 @@ Handler 来了~
             }
         }
     };
+```
 
 `注意，这里我把它定义成了一个 Activity 的成员变量，它是在主线程中创建完成的。`
 
 这里你可能就要问了，为什么在上面的子线程中调用了
 
+```java
     mHandler.sendMessage(msg);
-
+```
 后，msg 就能被甩到主线程中去呢，你说能就能吗？证据在哪里？
 
 其实通过运行代码，我们发现这样确实没问题了，我们在上面的 handlerMessage 方法中的 case 1 中获得了 对应 bitmap,而且
@@ -179,4 +194,4 @@ Handler 来了~
 
 以备以后再次忘记，哈哈~
 
-具体可以看下一遍文章 [Handler 之 源码解析](/Readme.md)
+具体可以看下一遍文章 [Handler 之 源码解析](http://gudong.name/2016/03/10/handler_analysis_two.html)
