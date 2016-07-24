@@ -22,23 +22,23 @@ Message: 一个消息对象
 现在要问了，他们是怎么关联起来的？
 
 一切都要从 Handler 的构造方法开始。如下所示
+```java
+final MessageQueue mQueue;
+final Looper mLooper;
+final Callback mCallback;
+final boolean mAsynchronous;
 
-    final MessageQueue mQueue;
-    final Looper mLooper;
-    final Callback mCallback;
-    final boolean mAsynchronous;
-
-    public Handler(Callback callback, boolean async) {
-        mLooper = Looper.myLooper();
-        if (mLooper == null) {
-            throw new RuntimeException(
-                "Can't create handler inside thread that has not called Looper.prepare()");
-        }
-        mQueue = mLooper.mQueue;
-        mCallback = callback;
-        mAsynchronous = async;
-      }
-
+public Handler(Callback callback, boolean async) {
+    mLooper = Looper.myLooper();
+    if (mLooper == null) {
+        throw new RuntimeException(
+            "Can't create handler inside thread that has not called Looper.prepare()");
+    }
+    mQueue = mLooper.mQueue;
+    mCallback = callback;
+    mAsynchronous = async;
+  }
+```
 可以看到 Handler 本身定义了一个 MessageQueue 对象 mQueue，和一个 Looper 的对象 mLooper。
 
 不过，对 Handler 的这两个成员变量的初始化都是通过 Looper 来赋值的。
