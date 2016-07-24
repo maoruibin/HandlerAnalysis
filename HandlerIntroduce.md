@@ -42,6 +42,7 @@
 
 是的，所以我们可以在主线程 new 一个子线程，让它开启工作，像下面这样
 
+```java
     private void executeTask(){
       new Thread(new Runnable() {
           @Override
@@ -55,6 +56,7 @@
           }
       }).start();
     }
+```
 
 如上所示，loadImg() 就是一个耗时操作，可以猜想的到，它里面都发生了什么。
 
