@@ -85,7 +85,7 @@ private void executeTask(){
 奔溃提示如上所示，注意中间那句提示，说的很明白，简单翻译一下
 
 ```java
-    Only the original thread that created a view hierarchy can touch its views.
+Only the original thread that created a view hierarchy can touch its views.
 ```
     只有创建了这个 view 层次树的线程才可以去 touch(泛指操作)这个 View
 
@@ -96,7 +96,7 @@ private void executeTask(){
 一般的，我们在 onCreate 中调用 setContent() 方法就可以完成布局的设置和加载，如下所示。
 
 ```java
-      setContentView(R.layout.activity_handler);
+setContentView(R.layout.activity_handler);
 ```
 
 很明显，setContent() 是在主线程中调用完成的，这里如果深究 setContent(),你会发现是 PhoneWindow 最终执行了相关的逻辑，而最终
@@ -107,7 +107,7 @@ private void executeTask(){
 我们在线程中获取到一张 Bitmap 并直接调用 imageView 的 setImageBitmap 方法，报了如下的错误。
 
 ```java
-    Only the original thread that created a view hierarchy can touch its views.       
+Only the original thread that created a view hierarchy can touch its views.       
 ```
 
 就是因为 这个 imageView 依附的层次树是在主线程中创建的。
@@ -130,25 +130,25 @@ Handler 来了~
 此时只要在子线程中去调用 handler 的 sendMessage(msg,obj) 方法，你就可以把自己的逻辑，或者程序流给甩到主线程(暂且让我们这么形容吧~)。
 
 ```java
-    private void executeTask(){
-         new Thread(new Runnable() {
-             @Override
-             public void run() {
-                  // 子线程
+private void executeTask(){
+     new Thread(new Runnable() {
+         @Override
+         public void run() {
+              // 子线程
 
-                  //............. 耗时操作 ................... //
+              //............. 耗时操作 ................... //
 
-                  Bitmap bitmap = loadImg("http://i.imgur.com/DvpvklR.png");
+              Bitmap bitmap = loadImg("http://i.imgur.com/DvpvklR.png");
 
-                  //............. 耗时操作 ................... //
+              //............. 耗时操作 ................... //
 
-                  Message msg = new Message();
-                  msg.what = 1;
-                  msg.obj = bitmap;
-                  mHandler.sendMessage(msg);
-             }
-         }).start();
-     }
+              Message msg = new Message();
+              msg.what = 1;
+              msg.obj = bitmap;
+              mHandler.sendMessage(msg);
+         }
+     }).start();
+ }
 ```
 
 上面可以看到，在子线程里，在执行完耗时操作，得到 bitmap 后，我们简单封装了一个 msg 对象，我们就把这个 msg
@@ -156,21 +156,21 @@ Handler 来了~
 如下所示：
 
 ```java
-    private Handler mHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case 1:
-                    Bitmap bitmap = (Bitmap) msg.obj;
-                    imageView.setImageBitmap(bitmap);
-                    break;
-                case -1:
-                    Toast.makeText(MainActivity.this, "msg "+msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                    break;
-            }
+private Handler mHandler = new Handler(){
+    @Override
+    public void handleMessage(Message msg) {
+        super.handleMessage(msg);
+        switch (msg.what){
+            case 1:
+                Bitmap bitmap = (Bitmap) msg.obj;
+                imageView.setImageBitmap(bitmap);
+                break;
+            case -1:
+                Toast.makeText(MainActivity.this, "msg "+msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                break;
         }
-    };
+    }
+};
 ```
 
 `注意，这里我把它定义成了一个 Activity 的成员变量，它是在主线程中创建完成的。`
@@ -178,7 +178,7 @@ Handler 来了~
 这里你可能就要问了，为什么在上面的子线程中调用了
 
 ```java
-    mHandler.sendMessage(msg);
+mHandler.sendMessage(msg);
 ```
 后，msg 就能被甩到主线程中去呢，你说能就能吗？证据在哪里？
 
