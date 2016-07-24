@@ -170,7 +170,7 @@ private static void prepare(boolean quitAllowed) {
 
 ```java
 sMainLooper = myLooper();
-```java
+```
 
 可以看看 sMainLooper 的定义，以及 myLooper() 方法；
 ```java
