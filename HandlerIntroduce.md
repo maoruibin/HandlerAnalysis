@@ -1,8 +1,14 @@
+>本人博客地址 http://gudong.name
+
+>本文博客地址:http://gudong.name/foundation/2016/03/10/handler_analysis_one.html
+
+>本文github地址:https://github.com/maoruibin/HandlerAnalysis/blob/master/HandlerIntroduce.md
+
 #Handler
 
 ##前言
 
-这篇文章从 为什么要有 Handler 到 如何使用 Handler 两个方面对 Handler 进行了介绍，并对我们熟知的常识『Android 中不允许在子线程中更新 UI』做了一个简要的分析。算是一篇比较基础的 Handler 介绍分析文章，另外由于篇幅原因，Handler 源码分析并未在该篇中介绍，如果要看，可以直接点击[Handler 之 源码解析](http://gudong.name/2016/03/10/handler_analysis_two.html) 
+这篇文章从 为什么要有 Handler 到 如何使用 Handler 两个方面对 Handler 进行了介绍，并对我们熟知的常识『Android 中不允许在子线程中更新 UI』做了一个简要的分析。算是一篇比较基础的 Handler 介绍分析文章。
 
 这篇文章主要讲解和记录自己对 Handler 的理解。因为一开始接触 Android 就接触到了 Handler，所以对 handler 的了解应该比较多，加上项目中在消息传递以及异步控制方面都要用到 Handler。自己也不止一遍的看过 Handler 源码，不过每次看的时候都能明白，但是时间久了，就很容易忘记。所以这次就有了这个 Handler 系列。从 Handler 的使用场景，到具体使用再到源码解析，自己重新再走一遍，同时通过博客记录下来，方便以后查阅。我想，这也是写博客的意义所在。
 

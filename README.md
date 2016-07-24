@@ -1,15 +1,23 @@
+
+>本人博客地址 http://gudong.name
+
+>本文博客地址:http://gudong.name/2016/03/10/handler_analysis_two.html
+
+>本文github地址:https://github.com/maoruibin/HandlerAnalysis
+
 # Handler 之 源码解析
-在分析源码之前，如果你对 Hanlder 存在的意义及作用不明白，你可以查看上一篇文章 [Handler 之 初识及简单应用](/HandlerIntroduce.md)，这篇文章同时也详细介绍了为什么子线程不能更新 UI 的原因，但是因为篇幅原因，所以对 Handler 的内部机制并没有展开叙述。这篇文章就从 Handler 开始解析与之相关的源码，从而更好的理解 Handler 以及 Looper MessageQueue。
+
+这篇文章是对 Handler 的源码解析，如果你是初学者，对 Handler 才开始学习，推荐你先看上一篇文章，[Handler 之 初识及简单应用](/HandlerIntroduce.md)，这篇文章从为什么要有 Handler 到 如何使用 Handler 两个方面对 Handler 进行了介绍，并对我们熟知的常识『Android 中不允许在子线程中更新 UI』做了一个简要的分析。
 
 ## Handler 机制
 
-写完上一篇文章，下面该再读一遍 Handler 的源码了，其实讲 Handler 内部机制的博客已经很多了，但是自己还是要在看一遍，源码是最好的资料。
+其实讲 Handler 内部机制的博客已经很多了，但是自己还是要在看一遍，源码是最好的资料。
 
 在具体看源码之前，有必要先理解一下 Handler、Looper、MessageQueue 以及 Message 他们的关系。
 
 ### 关系
 
-Looper: 是一个消息轮训器，他有一个叫 loop() 的方法，用于启动一个死循环，不停的去轮询消息池。
+Looper: 是一个消息轮训器，他有一个叫 loop() 的方法，用于启动一个循环，不停的去轮询消息池。
 
 这里插一句，Looper 中的 loop() 方法是如何实现阻塞的呢？可查看 [Android-Discuss issue 245](https://github.com/android-cn/android-discuss/issues/245)
 
@@ -22,6 +30,7 @@ Message: 一个消息对象
 现在要问了，他们是怎么关联起来的？
 
 一切都要从 Handler 的构造方法开始。如下所示
+
 ```java
 final MessageQueue mQueue;
 final Looper mLooper;
@@ -39,6 +48,7 @@ public Handler(Callback callback, boolean async) {
     mAsynchronous = async;
   }
 ```
+
 可以看到 Handler 本身定义了一个 MessageQueue 对象 mQueue，和一个 Looper 的对象 mLooper。
 
 不过，对 Handler 的这两个成员变量的初始化都是通过 Looper 来赋值的。
