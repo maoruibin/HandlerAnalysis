@@ -43,19 +43,19 @@
 是的，所以我们可以在主线程 new 一个子线程，让它开启工作，像下面这样
 
 ```java
-    private void executeTask(){
-      new Thread(new Runnable() {
-          @Override
-          public void run() {
-              try {
-                  Bitmap bitmap = loadImg("http://blog.happyhls.me/wp-content/uploads/2015/12/fresco-og-image-1024x362.png");
-              } catch (IOException e) {
-                  e.printStackTrace();
-                  mHandler.sendMessage(mHandler.obtainMessage(-1,e.getMessage()));
-              }
+private void executeTask(){
+  new Thread(new Runnable() {
+      @Override
+      public void run() {
+          try {
+              Bitmap bitmap = loadImg("http://blog.happyhls.me/wp-content/uploads/2015/12/fresco-og-image-1024x362.png");
+          } catch (IOException e) {
+              e.printStackTrace();
+              mHandler.sendMessage(mHandler.obtainMessage(-1,e.getMessage()));
           }
-      }).start();
-    }
+      }
+  }).start();
+}
 ```
 
 如上所示，loadImg() 就是一个耗时操作，可以猜想的到，它里面都发生了什么。
