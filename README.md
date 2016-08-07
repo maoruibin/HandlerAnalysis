@@ -244,9 +244,9 @@ private Looper(boolean quitAllowed) {
 
 那么在 Handler 的构造方法中，那个 mQueue 其实也是在应用启动时就已经创建好了。
 
-现在再来回顾一下 Handler 的构造方法，在构造方法中，他为自己的 mQuery 和 mLooper 分别赋值，而这两个值其实在应用启动时，就已经初始化好了。
+现在再来回顾一下 Handler 的构造方法，在构造方法中，他为自己的 mQueue 和 mLooper 分别赋值，而这两个值其实在应用启动时，就已经初始化好了。
 
-并且，现在已经启动了一个消息轮训，在监听 mQuery 中是不是有新的 Message !
+并且，现在已经启动了一个消息轮训，在监听 mQueue 中是不是有新的 Message !
 
 现在这个轮训器已经好了，我们看发送消息的过程。
 
@@ -315,8 +315,8 @@ Handler target;
 
 慢慢来，接下来继续看消息的传递。
 
-现在，我们只要发送了消息，那么消息池 mQuery 就会增加一个消息，Looper 就会开始工作，之前已经说了，在应用启动的时候，
-已经启动了 Looper 的 loop() 方法，这个方法会不断的去轮训 mQuery 消息池，只要有消息，它就会取出消息，并处理，那他是怎么处理的呢？看一下 loop() 的代码再说。
+现在，我们只要发送了消息，那么消息池 mQueue 就会增加一个消息，Looper 就会开始工作，之前已经说了，在应用启动的时候，
+已经启动了 Looper 的 loop() 方法，这个方法会不断的去轮训 mQueue 消息池，只要有消息，它就会取出消息，并处理，那他是怎么处理的呢？看一下 loop() 的代码再说。
 
 ```java
 public static void loop() {
@@ -414,7 +414,15 @@ public void dispatchMessage(Message msg) {
 }
 ```
 
-他首先判断 Message 对象的 callback 对象是不是为空，如果不为空，就直接调用 handleCallback 方法，并把 msg 对象传递过去，这样消息就被处理了。
+他首先判断 Message 对象的 callback 对象是不是为空，如果不为空，就直接调用 handleCallback 方法，并把 msg 对象传递过去，这样消息就被处理了,我们来看 Message 的 handleCallback 方法：
+
+```java
+private static void handleCallback(Message message) {
+    message.callback.run();
+}
+```
+
+没什么好说的了，直接调用 Handler post 的 Runnable 对象的 run() 方法。
 
 如果在发送消息时，我们没有给 Message 设置 callback 对象，那么程序会执行到 else 语句块，此时首先判断 Handler 的 mCallBack 对象是不是空的，如果不为空，直接调用 mCallback 的 handleMessage 方法进行消息处理。
 
